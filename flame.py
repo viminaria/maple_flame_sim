@@ -118,10 +118,14 @@ def evaluate_flame(flame_lines):
 def score_flame(stats, type):
     all_stat = 8
     att = 3
+    all_stat_x = 20
+    att_x = 6
     if type == 'str' or type == 'dex' or type == 'luk':
         return stats['as'] * all_stat + stats['att'] * att + stats[type]
-    else:
+    elif type == 'int':
         return stats['as'] * all_stat + stats['matt'] * att + stats[type]
+    elif type == 'as':
+        return stats['as'] * all_stat_x + stats['att'] * att_x + stats['dex'] + stats['str'] + stats['luk']
                           
 def main():
     parser = argparse.ArgumentParser(usage=__doc__)
@@ -130,7 +134,7 @@ def main():
     parser.add_argument('--trials', type=int, default=1000, help="number of flames to use")
     parser.add_argument('--level', type=str, default='140-149', help='equip level range, options are: 100-109, 110-119, 120-129, 130-139, 140-149, 150-159, 160-169, 170-179, 180-189, 190-199, 200-209')
     parser.add_argument('--threshold', type=int, default=120, help='flame score to keep (for statistics)')
-    parser.add_argument('--stat', type=str, default='str', help='specify desired stat str, dex, int, luk (default str, does not actually matter)')
+    parser.add_argument('--stat', type=str, default='str', help='specify desired stat str, dex, int, luk, as (default str, does not actually matter)')
     args = parser.parse_args()
     boss_flame = not args.noboss
     equip_lvl = args.level
@@ -148,13 +152,13 @@ def main():
             tier = roll_tier(args.type) + (2 if boss_flame else 0)
             res = option_table[option_id][equip_lvl][tier]
             flame_lines.append([option_id, res])
-            flame_stats = evaluate_flame(flame_lines)
-            score = score_flame(flame_stats, args.stat)
-            if score > args.threshold:
-                keep += 1
-                if score > max_flame:
-                    max_flame = score
-                    max_flame_lines = flame_stats
+        flame_stats = evaluate_flame(flame_lines)
+        score = score_flame(flame_stats, args.stat)
+        if score > args.threshold:
+            keep += 1
+            if score > max_flame:
+                max_flame = score
+                max_flame_lines = flame_stats
     print 'best score: {}'.format(max_flame)
     print 'stats: {}'.format(max_flame_lines)
     print 'score above {}: {} out of {} trials'.format(args.threshold, keep, args.trials)
