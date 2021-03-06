@@ -5,6 +5,11 @@ Flames your item specified number of times, output is best flame and number of t
 """
 import argparse
 import random
+import numpy
+from numpy.random import choice
+import matplotlib.pyplot as plt
+import seaborn as sns
+import time
 
 options = ['str', 'dex', 'int', 'luk', 'strdex', 'strint', 'strluk', 'dexint', 'dexluk', 'intluk', 'hp', 'mp', 'lvlred', 'def', 'att', 'matt', 'speed', 'jmp', 'as']
 
@@ -116,34 +121,80 @@ def evaluate_flame(flame_lines):
     return stats
     
 def score_flame(stats, type):
-    all_stat = 8
+    all_stat = 9
+    sub_stat = 0.08
     att = 3
     all_stat_x = 20
     att_x = 6
-    if type == 'str' or type == 'dex' or type == 'luk':
-        return stats['as'] * all_stat + stats['att'] * att + stats[type]
+    if type == 'str' or type == 'luk':
+        return stats['as'] * all_stat + stats['att'] * att + stats[type] + stats['dex'] * sub_stat
+    elif type == 'dex':
+        return stats['as'] * all_stat + stats['att'] * att + stats[type] + stats['str'] * sub_stat
     elif type == 'int':
-        return stats['as'] * all_stat + stats['matt'] * att + stats[type]
+        return stats['as'] * all_stat + stats['matt'] * att + stats[type] + stats['luk'] * sub_stat
     elif type == 'as':
         return stats['as'] * all_stat_x + stats['att'] * att_x + stats['dex'] + stats['str'] + stats['luk']
-                          
+
+def generate_image_from_histogram(flames, type, level, noboss):
+    boss = "boss"
+    if noboss:
+        boss = "non-boss"
+    bins = int(max(flames) - min(flames))/5
+
+    fig, axs = plt.subplots(1, 2, figsize=(12, 5))
+
+    axs[0].hist(flames, bins=bins)
+    axs[0].set_title('Histogram')
+    axs[0].set_xlabel('Flame Score')
+    axs[0].set_ylabel('Flames')
+    axs[0].grid(axis='y')
+    axs[0].margins(y=0, tight=True)
+    axs[0].set_xlim(0, max(flames))
+
+    sns.distplot(flames, ax=axs[1], bins=bins, hist=False)
+    axs[1].set_title("Density Estimation")
+    axs[1].set_xlabel('Flame Score')
+    axs[1].set_ylabel('Density')
+    axs[1].grid(axis='y')
+    axs[1].margins(y=0, tight=True)
+    axs[1].set_xlim(0, max(flames))
+
+    fig.suptitle(str(len(flames)) + ' ' + str(type) + 's used on level ' + level + ' ' + boss + ' item')
+    
+    plt.savefig('hist.png', dpi=300)
+    
+    plt.show()
+ 
 def main():
+    start = time.time()
     parser = argparse.ArgumentParser(usage=__doc__)
     parser.add_argument('--type', type=str, default='pflame', help='options are: pflame, eflame, regcraft, mastercraft, meistercraft, masterfuse, meisterfuse')
     parser.add_argument('--noboss', action='store_true', help="include this argument with no value to indicate not boss flame")
-    parser.add_argument('--trials', type=int, default=1000, help="number of flames to use")
+    parser.add_argument('--trials', type=int, default=100000, help="number of flames to use")
     parser.add_argument('--level', type=str, default='140-149', help='equip level range, options are: 100-109, 110-119, 120-129, 130-139, 140-149, 150-159, 160-169, 170-179, 180-189, 190-199, 200-209')
     parser.add_argument('--threshold', type=int, default=120, help='flame score to keep (for statistics)')
     parser.add_argument('--stat', type=str, default='str', help='specify desired stat str, dex, int, luk, as (default str, does not actually matter)')
     args = parser.parse_args()
     boss_flame = not args.noboss
     equip_lvl = args.level
+    flames = []
     keep = 0
     max_flame = 0
     max_flame_lines = []
-    for _ in xrange(args.trials):
+    for i in xrange(args.trials): 
+        if args.noboss:
+            # https://docs.google.com/spreadsheets/d/14bKXNRYgC7Xa9S18b0jSi6tY6udOHH5B-S4PZtysN_4/
+            # 67/202, 93/202, 37/202, 5/202
+            #
+            # STELLA DATA (stella_data.txt)
+            # 122/315, 120/315, 58/315, 15/315
+            #
+            # AGGREGATE DATA WEIGHTS = 0.365, 0.41, 0.185, 0.04
+
+            nonboss_lines = [1, 2, 3, 4]
+            nonboss_weighted_choice = choice(nonboss_lines, 1, p=[0.365, 0.41, 0.185, 0.04])
         used_options = []
-        for i in xrange(4 if boss_flame else random.randrange(5)):
+        for i in xrange(4 if boss_flame else nonboss_weighted_choice):
             roll = select_option(random.randrange(19 - i), used_options)
             used_options.append(roll)
         flame_lines = []
@@ -154,14 +205,33 @@ def main():
             flame_lines.append([option_id, res])
         flame_stats = evaluate_flame(flame_lines)
         score = score_flame(flame_stats, args.stat)
+        flames.append(score)
         if score > args.threshold:
             keep += 1
             if score > max_flame:
                 max_flame = score
                 max_flame_lines = flame_stats
-    print 'best score: {}'.format(max_flame)
-    print 'stats: {}'.format(max_flame_lines)
-    print 'score above {}: {} out of {} trials'.format(args.threshold, keep, args.trials)
+    stop = time.time()
+    s = stop-start
+
+    avg_flames = int(args.trials / keep)
+    avg_cost = float(args.trials / keep) * 9120000 / 1000000000
+
+    print
+    print ' settings: level: {}, threshold: {}, type: {}, noboss: {}'.format(args.level, args.threshold, args.type, args.noboss)
+    print
+    print ' best score: {:0.2f}'.format(max_flame)
+    print ' stats: {}'.format(max_flame_lines)
+    print
+    print ' score above {}: {} out of {} trials'.format(args.threshold, keep, args.trials)
+    print ' average flames: {:0d}'.format(avg_flames)
+    if args.type == 'pflame':
+        print ' average meso cost: {:0.3f}b'.format(avg_cost)
+    print
+    print ' time: {:0.3f} seconds'.format(s)
+    print
+
+    #generate_image_from_histogram(flames, args.type, args.level, args.noboss)
 
 if __name__ == "__main__":
     main()
