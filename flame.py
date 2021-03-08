@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import time
 
-options = ['str', 'dex', 'int', 'luk', 'strdex', 'strint', 'strluk', 'dexint', 'dexluk', 'intluk', 'hp', 'mp', 'lvlred', 'def', 'att', 'matt', 'speed', 'jmp', 'as']
+options = ['str', 'dex', 'int', 'luk', 'strdex', 'strint', 'strluk', 'dexint', 'dexluk', 'intluk', 'hp', 'mp', 'lvlred', 'def', 'att', 'matt', 'speed', 'jmp', 'as', 'kanna', 'alt_thief']
 
 tier_table = {'drop' : [.25, .3, .3, .14, .01], 
               'pflame' : [.2, .3, .36, .14, 0],
@@ -126,45 +126,24 @@ def score_flame(stats, type):
     att = 3
     all_stat_x = 20
     att_x = 6
+    hpmp = 0.0015
+    all_stat_d = 10
+    att_d = 20
     if type == 'str' or type == 'luk':
         return stats['as'] * all_stat + stats['att'] * att + stats[type] + stats['dex'] * sub_stat
     elif type == 'dex':
         return stats['as'] * all_stat + stats['att'] * att + stats[type] + stats['str'] * sub_stat
     elif type == 'int':
         return stats['as'] * all_stat + stats['matt'] * att + stats[type] + stats['luk'] * sub_stat
+    elif type == 'kanna':
+        return stats['as'] * all_stat + stats['matt'] * att + stats['luk'] * sub_stat + stats['int'] + stats['hp'] * hpmp * att + stats['mp'] * hpmp * att
+    elif type == 'hp':
+        return stats['as'] * all_stat_d + stats['att'] * att_d + stats[type] + stats['str'] * sub_stat
+    elif type == 'alt_thief':
+        return stats['as'] * all_stat + stats['att'] * att + stats['luk'] + stats['str'] * sub_stat +  stats['dex'] * sub_stat
     elif type == 'as':
         return stats['as'] * all_stat_x + stats['att'] * att_x + stats['dex'] + stats['str'] + stats['luk']
 
-def generate_image_from_histogram(flames, type, level, noboss):
-    boss = "boss"
-    if noboss:
-        boss = "non-boss"
-    bins = int(max(flames) - min(flames))/5
-
-    fig, axs = plt.subplots(1, 2, figsize=(12, 5))
-
-    axs[0].hist(flames, bins=bins)
-    axs[0].set_title('Histogram')
-    axs[0].set_xlabel('Flame Score')
-    axs[0].set_ylabel('Flames')
-    axs[0].grid(axis='y')
-    axs[0].margins(y=0, tight=True)
-    axs[0].set_xlim(0, max(flames))
-
-    sns.distplot(flames, ax=axs[1], bins=bins, hist=False)
-    axs[1].set_title("Density Estimation")
-    axs[1].set_xlabel('Flame Score')
-    axs[1].set_ylabel('Density')
-    axs[1].grid(axis='y')
-    axs[1].margins(y=0, tight=True)
-    axs[1].set_xlim(0, max(flames))
-
-    fig.suptitle(str(len(flames)) + ' ' + str(type) + 's used on level ' + level + ' ' + boss + ' item')
-    
-    plt.savefig('hist.png', dpi=300)
-    
-    plt.show()
- 
 def main():
     start = time.time()
     parser = argparse.ArgumentParser(usage=__doc__)
@@ -217,10 +196,14 @@ def main():
     avg_flames = int(args.trials / keep)
     avg_cost = float(args.trials / keep) * 9120000 / 1000000000
 
-    print
+    if args.stat == 'kanna' or args.stat == 'alt_thief' or args.stat == 'hp':
+        print
+        print ' stat: {}'.format(args.stat)
+    else:
+        print
     print ' settings: level: {}, threshold: {}, type: {}, noboss: {}'.format(args.level, args.threshold, args.type, args.noboss)
     print
-    print ' best score: {:0.2f}'.format(max_flame)
+    print ' best score: {:0.3f}'.format(max_flame)
     print ' stats: {}'.format(max_flame_lines)
     print
     print ' score above {}: {} out of {} trials'.format(args.threshold, keep, args.trials)
@@ -230,8 +213,6 @@ def main():
     print
     print ' time: {:0.3f} seconds'.format(s)
     print
-
-    #generate_image_from_histogram(flames, args.type, args.level, args.noboss)
 
 if __name__ == "__main__":
     main()
