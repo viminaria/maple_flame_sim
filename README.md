@@ -4,7 +4,7 @@ simple python script to test equal probability line flame outputs in maple
 - Changed all stat value to 9
 - Addition of secondary stats for flame score evaluation (default 0.08)
 - Weightings for line count on non-boss items using experimental data
-- Support for Kanna and Demon Avenger flame scores
+- Support for Kanna, Demon Avenger and dual secondary stat thief flame scores
 
 ## Examples:
 
