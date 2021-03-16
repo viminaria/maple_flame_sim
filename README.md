@@ -38,7 +38,7 @@ average flames: 198\
 time: 11.996 seconds
 
 ### Non-boss flame (will take longer to calculate due to line weightings):
-$ python flame.py --trials 1000000 --level 140-149 --threshold 60 --noboss\
+$ python flame.py -trials 1000000 -level 140-149 -threshold 60 -noboss\
 settings: level: 140-149, threshold: 60, type: pflame, noboss: True\
 \
 best score: 90.00\
@@ -51,4 +51,6 @@ average meso cost: 15.349b\
 time: 35.603 seconds
 
 ### For option values:
-$ python flame.py  --help
+$ python flame.py --help
+OR
+$ python flame.py -h
