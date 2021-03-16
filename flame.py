@@ -7,8 +7,6 @@ import argparse
 import random
 import numpy
 from numpy.random import choice
-import matplotlib.pyplot as plt
-import seaborn as sns
 import time
 
 options = ['str', 'dex', 'int', 'luk', 'strdex', 'strint', 'strluk', 'dexint', 'dexluk', 'intluk', 'hp', 'mp', 'lvlred', 'def', 'att', 'matt', 'speed', 'jmp', 'as', 'kanna', 'alt_thief']
@@ -147,12 +145,12 @@ def score_flame(stats, type):
 def main():
     start = time.time()
     parser = argparse.ArgumentParser(usage=__doc__)
-    parser.add_argument('--type', type=str, default='pflame', help='options are: pflame, eflame, regcraft, mastercraft, meistercraft, masterfuse, meisterfuse')
-    parser.add_argument('--noboss', action='store_true', help="include this argument with no value to indicate not boss flame")
-    parser.add_argument('--trials', type=int, default=100000, help="number of flames to use")
-    parser.add_argument('--level', type=str, default='140-149', help='equip level range, options are: 100-109, 110-119, 120-129, 130-139, 140-149, 150-159, 160-169, 170-179, 180-189, 190-199, 200-209')
-    parser.add_argument('--threshold', type=int, default=120, help='flame score to keep (for statistics)')
-    parser.add_argument('--stat', type=str, default='str', help='specify desired stat str, dex, int, luk, as (default str, does not actually matter)')
+    parser.add_argument('-type', type=str, default='pflame', help='options are: pflame, eflame, regcraft, mastercraft, meistercraft, masterfuse, meisterfuse')
+    parser.add_argument('-noboss', action='store_true', help="include this argument with no value to indicate not boss flame")
+    parser.add_argument('-trials', type=int, default=100000, help="number of flames to use")
+    parser.add_argument('-level', type=str, default='140-149', help='equip level range, options are: 100-109, 110-119, 120-129, 130-139, 140-149, 150-159, 160-169, 170-179, 180-189, 190-199, 200-209')
+    parser.add_argument('-threshold', type=int, default=110, help='flame score to keep (for statistics)')
+    parser.add_argument('-stat', type=str, default='str', help='specify desired stat str, dex, int, luk, as (default str, does not actually matter)')
     args = parser.parse_args()
     boss_flame = not args.noboss
     equip_lvl = args.level
@@ -213,6 +211,8 @@ def main():
     print
     print ' time: {:0.3f} seconds'.format(s)
     print
+
+    #generate_image_from_histogram(flames, args.type, args.level, args.noboss)
 
 if __name__ == "__main__":
     main()
