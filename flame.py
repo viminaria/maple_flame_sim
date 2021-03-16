@@ -150,7 +150,7 @@ def main():
     parser.add_argument('-trials', type=int, default=100000, help="number of flames to use")
     parser.add_argument('-level', type=str, default='140-149', help='equip level range, options are: 100-109, 110-119, 120-129, 130-139, 140-149, 150-159, 160-169, 170-179, 180-189, 190-199, 200-209')
     parser.add_argument('-threshold', type=int, default=110, help='flame score to keep (for statistics)')
-    parser.add_argument('-stat', type=str, default='str', help='specify desired stat str, dex, int, luk, as (default str, does not actually matter)')
+    parser.add_argument('-stat', type=str, default='str', help='specify desired stat str, dex, int, luk, as, kanna, da, alt_thief (default str)')
     args = parser.parse_args()
     boss_flame = not args.noboss
     equip_lvl = args.level
@@ -161,15 +161,18 @@ def main():
     for i in xrange(args.trials): 
         if args.noboss:
             # https://docs.google.com/spreadsheets/d/14bKXNRYgC7Xa9S18b0jSi6tY6udOHH5B-S4PZtysN_4/
-            # 67/202, 93/202, 37/202, 5/202
+            # OLD DATA --- 67/202, 93/202, 37/202, 5/202
+            #
+            # NEW DATA FROM ABOVE SPREADSHEET
+            # 144/367, 144/367, 67/367, 12/367
             #
             # STELLA DATA (stella_data.txt)
             # 122/315, 120/315, 58/315, 15/315
             #
-            # AGGREGATE DATA WEIGHTS = 0.365, 0.41, 0.185, 0.04
+            # AGGREGATE DATA WEIGHTS = 0.39, 0.39, 0.18, 0.04
 
             nonboss_lines = [1, 2, 3, 4]
-            nonboss_weighted_choice = choice(nonboss_lines, 1, p=[0.365, 0.41, 0.185, 0.04])
+            nonboss_weighted_choice = choice(nonboss_lines, 1, p=[0.39, 0.39, 0.18, 0.04])
         used_options = []
         for i in xrange(4 if boss_flame else nonboss_weighted_choice):
             roll = select_option(random.randrange(19 - i), used_options)
