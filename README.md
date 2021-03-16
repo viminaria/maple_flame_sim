@@ -51,6 +51,6 @@ average meso cost: 15.349b\
 time: 35.603 seconds
 
 ### For option values:
-$ python flame.py --help
-OR
+$ python flame.py --help\
+OR\
 $ python flame.py -h
