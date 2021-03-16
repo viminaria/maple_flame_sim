@@ -8,7 +8,7 @@ simple python script to test equal probability line flame outputs in maple
 
 ## Examples:
 
-$ python flame.py --trials 1000000 --level 160-169 --threshold 120\
+$ python flame.py -trials 1000000 -level 160-169 -threshold 120\
 \
 settings: level: 160-169, threshold: 120, type: pflame, noboss: False\
 \
@@ -21,11 +21,11 @@ average meso cost: 4.578b\
 \
 time: 12.504 seconds
 
-default options: --type=pflame, --stat=str, default item gets boss flame
+default options: -type pflame, -stat str, default item gets boss flame
 
 ### Full options:
 
-$ python flame.py --trials 1000000 --level 160-169 --threshold 240 --stat as --type eflame\
+$ python flame.py -trials 1000000 -level 160-169 -threshold 240 -stat as -type eflame\
 \
 settings: level: 160-169, threshold: 240, type: eflame, noboss: False\
 \
